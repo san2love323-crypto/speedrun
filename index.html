@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>한국 스피드런 포럼</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{--blue:#1f4f9c;--blue-d:#173c78;--bg:#f6f7f9;--card:#fff;--line:#e5e7eb;--txt:#111827;--mut:#6b7280;--ok:#16a34a;--bad:#dc2626;--warn:#d97706;--gold:#ca8a04}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Pretendard,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;font-size:15px}
+a{color:var(--blue);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:15px}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.hwrap{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:0 20px;height:56px}
+.logo{font-weight:800;font-size:18px;color:var(--txt);margin-right:12px;white-space:nowrap}
+.logo span{color:var(--blue)}
+nav a{padding:18px 12px;display:inline-block;color:#374151;font-weight:600;border-bottom:2px solid transparent}
+nav a.on{color:var(--txt);border-bottom-color:var(--txt)}
+.spacer{flex:1}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--blue-d)}
+.btn.ghost{background:#fff;color:var(--txt);border:1px solid var(--line)}
+.btn.ghost:hover{background:#f3f4f6}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn.ok{background:var(--ok)}.btn.bad{background:var(--bad)}.btn.warn{background:var(--warn)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.layout{max-width:1500px;margin:0 auto;display:grid;grid-template-columns:340px 1fr;min-height:calc(100vh - 56px)}
+.layout.full{grid-template-columns:1fr}
+aside{background:#fff;border-right:1px solid var(--line);padding:16px;position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto}
+.side-title{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;margin:4px 0 12px}
+.side-title small{font-weight:600;color:var(--mut);font-size:14px}
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:#fff}
+.search input{border:0;outline:0;flex:1;font-size:14px}
+.side-sub{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;margin:14px 0 6px}
+.glist a{display:grid;grid-template-columns:34px 1fr;align-items:center;padding:12px 8px;border-radius:8px;color:var(--txt)}
+.glist a:hover{background:#f3f4f6}
+.glist a.on{background:#eaf0fb}
+.glist .no{color:var(--mut);font-weight:700}
+.glist .nm{font-weight:700;font-size:15px}
+.glist .meta{font-size:12.5px;color:var(--mut)}
+main{padding:24px 28px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 380px;gap:20px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+h1{font-size:32px;margin:0;display:flex;align-items:center;gap:16px}
+h1 .rank{color:var(--txt);font-weight:900;padding-right:16px;border-right:2px solid var(--line)}
+h2{font-size:18px;margin:0 0 12px}
+.sub{color:var(--mut);margin:8px 0 18px}
+.sub b{color:var(--txt)}
+table{width:100%;border-collapse:collapse}
+th{font-weight:600;color:var(--mut);font-size:13px;text-align:left;padding:10px 12px;background:#f9fafb;border-bottom:1px solid var(--line)}
+td{padding:11px 12px;border-bottom:1px solid #f1f2f4;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.mono{font-variant-numeric:tabular-nums;font-weight:700}
+.empty{color:var(--mut);text-align:center;padding:40px 0}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:18px 12px}
+.info .k{font-size:13px;color:var(--mut);margin-bottom:4px}
+.info .v{font-weight:700;font-size:17px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tag{border:1px solid var(--line);border-radius:6px;padding:5px 9px;font-size:13px;background:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+.tabs button{background:none;border:0;padding:10px 14px;font-weight:700;color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--txt);border-bottom-color:var(--txt)}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.b-pending{background:#fef3c7;color:#92400e}.b-approved{background:#dbeafe;color:#1e40af}.b-published{background:#dcfce7;color:#166534}.b-rejected{background:#fee2e2;color:#991b1b}
+.b-ai{background:#ede9fe;color:#5b21b6}.b-admin{background:#e5e7eb;color:#374151}
+.field{margin-bottom:18px}
+.field label{display:block;font-weight:700;margin-bottom:8px}
+.field label small{color:var(--bad);font-weight:600;font-size:12px;margin-left:6px}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#fff;outline:0}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue)}
+.field .hint{color:var(--mut);font-size:13px;margin-top:6px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.guide{background:#f3f4f6;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:20px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
+.modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:14px;padding:26px;width:420px;max-width:94vw;max-height:90vh;overflow:auto}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 18px;border-radius:10px;font-weight:600;display:none;z-index:60}
+.toast.on{display:block}
+.stat{display:flex;flex-direction:column;gap:4px}
+.stat .n{font-size:28px;font-weight:900}.stat .l{color:var(--mut);font-size:13px}
+.user-link{font-weight:700;color:var(--txt)}
+.user-link:hover{color:var(--blue)}
+.yt{display:inline-flex;align-items:center;gap:4px;color:var(--bad);font-weight:700;font-size:13px}
+.hard-item{display:grid;grid-template-columns:70px 1fr auto;gap:16px;align-items:center;padding:16px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:10px}
+.hard-item .pos{font-size:28px;font-weight:900;color:var(--txt)}
+.hard-item .t{font-size:18px;font-weight:800}
+.hard-item .d{color:var(--mut);font-size:13px;margin-top:4px}
+.pts{background:#fef9c3;color:#854d0e;padding:4px 10px;border-radius:8px;font-weight:800;white-space:nowrap}
+.gacha-box{display:flex;flex-direction:column;align-items:center;gap:14px;padding:30px 10px}
+.gacha-card{width:320px;min-height:150px;border-radius:16px;border:2px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#fff;text-align:center;transition:transform .15s}
+.gacha-card.spin{animation:shake .12s infinite}
+@keyframes shake{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}100%{transform:rotate(-2deg)}}
+.r-common{border-color:#9ca3af}.r-rare{border-color:#3b82f6;box-shadow:0 0 18px #3b82f655}.r-epic{border-color:#8b5cf6;box-shadow:0 0 22px #8b5cf677}.r-legend{border-color:#f59e0b;box-shadow:0 0 28px #f59e0b99}
+.timer-big{font-size:56px;font-weight:900;font-variant-numeric:tabular-nums;text-align:center;letter-spacing:1px}
+.splits{margin-top:10px}
+.mini{font-size:13px;color:var(--mut)}
+.admin-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sub-card{border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px;background:#fff}
+.sub-card .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.sub-card .kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px 16px;margin:12px 0;font-size:13.5px}
+.sub-card .kv b{color:var(--mut);font-weight:600;margin-right:6px}
+.idle{font-size:13px;padding:8px 12px;border-radius:8px;background:#ecfdf5;color:#065f46;display:inline-block}
+.idle.off{background:#fef2f2;color:#991b1b}
+.rank-badge{display:inline-block;width:28px;height:28px;border-radius:50%;line-height:28px;text-align:center;font-weight:900;font-size:13px;background:#f3f4f6}
+.rank-1{background:#fde68a;color:#78350f}.rank-2{background:#e5e7eb;color:#374151}.rank-3{background:#fed7aa;color:#7c2d12}
+.avatar{display:inline-block;width:34px;height:34px;border-radius:8px;background:var(--blue);color:#fff;font-weight:900;text-align:center;line-height:34px;font-size:15px}
+.setup{max-width:720px;margin:60px auto;padding:30px}
+code{background:#f3f4f6;padding:2px 6px;border-radius:5px;font-size:13px}
+@media (max-width:1000px){.layout{grid-template-columns:1fr}aside{position:static;height:auto;max-height:300px}.grid2,.grid3,.row2{grid-template-columns:1fr}h1{font-size:24px}}
+</style>
+</head>
+<body>
+<header><div class="hwrap">
+  <a class="logo" href="#/">KR<span>SPEEDRUN</span> 포럼</a>
+  <nav id="nav">
+    <a href="#/" data-r="home">홈</a>
+    <a href="#/games" data-r="games">게임</a>
+    <a href="#/ranking" data-r="ranking">유저 랭킹</a>
+    <a href="#/hardest" data-r="hardest">최고 난이도</a>
+    <a href="#/tools" data-r="tools">도구</a>
+    <a href="#/me" data-r="me" id="nav-me" style="display:none">내 제출</a>
+    <a href="#/admin" data-r="admin" id="nav-admin" style="display:none">관리자</a>
+  </nav>
+  <div class="spacer"></div>
+  <span id="auth-area"></span>
+</div></header>
+
+<div id="app"></div>
+<div class="modal-bg" id="modal"><div class="modal" id="modal-body"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ======================= 설정 =======================
+// Supabase 대시보드 > Project Settings > API 에서 복사
+const SUPABASE_URL = "https://nfsmdkoskebznirdytvs.supabase.co/rest/v1/";        // 예: https://abcdefgh.supabase.co
+const SUPABASE_ANON_KEY = "sb_publishable_iGjHacKLhTSF5PbaXCDyxQ_klG8QZzz";
+// ====================================================
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const toast = (m, ms=2600) => { const t=$("#toast"); t.textContent=m; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"), ms); };
+const fmt = ms => { ms=Number(ms)||0; const h=Math.floor(ms/3600000), m=Math.floor(ms%3600000/60000), s=Math.floor(ms%60000/1000), cs=Math.floor(ms%1000/10);
+  return (h?h+":":"")+String(m).padStart(h?2:1,"0")+":"+String(s).padStart(2,"0")+"."+String(cs).padStart(2,"0"); };
+const fmtDate = d => d ? new Date(d).toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit"}) : "-";
+const fmtDT = d => d ? new Date(d).toLocaleString("ko-KR",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}) : "-";
+function parseTime(str){ // "1:23:45.67" / "23:45" / "45.5" / "1h 2m 3s"
+  str=String(str).trim(); if(!str) return null;
+  let m=str.match(/^(?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:(\d+(?:\.\d+)?)s)?$/i);
+  if(m && (m[1]||m[2]||m[3])) return Math.round(((+m[1]||0)*3600+(+m[2]||0)*60+(+m[3]||0))*1000);
+  const parts=str.split(":"); if(parts.length>3||parts.some(p=>p===""||isNaN(p))) return null;
+  let sec=0; for(const p of parts) sec=sec*60+parseFloat(p);
+  return Math.round(sec*1000);
+}
+const ytId = u => { const m=String(u||"").match(/(?:v=|youtu\.be\/|shorts\/|live\/)([\w-]{11})/); return m?m[1]:null; };
+const isYt = u => /^(https?:\/\/)?(www\.|m\.)?(youtube\.com|youtu\.be)\//i.test(String(u||""));
+
+let sb=null, me=null, profile=null, games=[], gameStats={}, settings={};
+const isAdmin = () => profile && profile.role==="admin" && !profile.banned;
+
+function openModal(html){ $("#modal-body").innerHTML=html; $("#modal").classList.add("on"); }
+function closeModal(){ $("#modal").classList.remove("on"); }
+$("#modal").addEventListener("click", e=>{ if(e.target.id==="modal") closeModal(); });
+
+// ======================= 초기화 =======================
+async function init(){
+  if(SUPABASE_URL.startsWith("YOUR_")){ $("#app").innerHTML=`<div class="card setup"><h1>⚙️ 설정이 필요해요</h1><p>index.html 상단의 <code>SUPABASE_URL</code> 과 <code>SUPABASE_ANON_KEY</code> 를 Supabase 프로젝트 값으로 바꿔주세요. README.md 를 참고하세요.</p></div>`; return; }
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  sb.auth.onAuthStateChange(async (_e, session)=>{ me=session?.user||null; await loadProfile(); renderAuth(); route(); });
+  const { data:{ session } } = await sb.auth.getSession(); me=session?.user||null;
+  await Promise.all([loadProfile(), loadGames(), loadSettings()]);
+  renderAuth(); route();
+  window.addEventListener("hashchange", route);
+  setInterval(heartbeat, 30000);
+}
+async function loadProfile(){ profile=null; if(!me) return; const {data}=await sb.from("profiles").select("*").eq("id",me.id).single(); profile=data; heartbeat(); }
+async function loadGames(){ const [{data:g},{data:s}]=await Promise.all([sb.from("games").select("*").order("name"), sb.rpc("game_stats")]);
+  games=g||[]; gameStats={}; (s||[]).forEach(r=>gameStats[r.game_id]=r); }
+async function loadSettings(){ const {data}=await sb.from("settings").select("*"); settings={}; (data||[]).forEach(r=>settings[r.key]=r.value); }
+async function heartbeat(){ if(isAdmin() && document.visibilityState==="visible") await sb.rpc("admin_heartbeat"); }
+
+function renderAuth(){
+  $("#nav-me").style.display = me?"":"none";
+  $("#nav-admin").style.display = isAdmin()?"":"none";
+  $("#auth-area").innerHTML = me
+    ? `<a href="#/user/${encodeURIComponent(profile?.nickname||"")}" class="user-link" style="margin-right:10px"><span class="avatar" style="width:28px;height:28px;line-height:28px;font-size:12px;margin-right:6px">${esc((profile?.nickname||"?")[0])}</span>${esc(profile?.nickname||"")}${isAdmin()?' <span class="badge b-admin">관리자</span>':''}</a><button class="btn ghost sm" onclick="logout()">로그아웃</button>`
+    : `<button class="btn ghost sm" onclick="authModal('login')">로그인</button> <button class="btn sm" onclick="authModal('signup')">회원가입</button>`;
+}
+function authModal(mode){
+  openModal(`<h2>${mode==="login"?"로그인":"회원가입"}</h2>
+  ${mode==="signup"?`<div class="field"><label>닉네임 <small>필수</small></label><input id="a-nick" placeholder="포럼에서 사용할 닉네임" maxlength="20"></div>`:""}
+  <div class="field"><label>이메일</label><input id="a-email" type="email" placeholder="you@example.com"></div>
+  <div class="field"><label>비밀번호</label><input id="a-pw" type="password" placeholder="6자 이상" onkeydown="if(event.key==='Enter')doAuth('${mode}')"></div>
+  <button class="btn" style="width:100%;justify-content:center" onclick="doAuth('${mode}')">${mode==="login"?"로그인":"가입하기"}</button>
+  <p class="mini" style="text-align:center;margin-top:12px">${mode==="login"?`계정이 없나요? <a href="javascript:authModal('signup')">회원가입</a>`:`이미 계정이 있나요? <a href="javascript:authModal('login')">로그인</a>`}</p>`);
+}
+async function doAuth(mode){
+  const email=$("#a-email").value.trim(), password=$("#a-pw").value;
+  if(mode==="signup"){ const nickname=$("#a-nick").value.trim(); if(nickname.length<2) return toast("닉네임은 2자 이상");
+    const {error}=await sb.auth.signUp({email,password,options:{data:{nickname}}}); if(error) return toast("가입 실패: "+error.message);
+    toast("가입 완료! (이메일 인증이 켜져 있으면 메일을 확인하세요)"); }
+  else { const {error}=await sb.auth.signInWithPassword({email,password}); if(error) return toast("로그인 실패: "+error.message); toast("환영합니다!"); }
+  closeModal();
+}
+async function logout(){ await sb.auth.signOut(); location.hash="#/"; }
+
+// ======================= 라우팅 =======================
+function route(){
+  const h=location.hash||"#/"; const [path,...rest]=h.slice(2).split("/"); const r=path||"home";
+  document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("on", a.dataset.r===r));
+  clearInterval(window._poll);
+  const P={home:pageHome, games:pageGames, game:()=>pageGame(+rest[0], rest[1]), ranking:pageRanking, hardest:pageHardest, tools:pageTools,
+           submit:()=>pageSubmit(rest[0]), me:pageMe, user:()=>pageUser(decodeURIComponent(rest.join("/"))), admin:pageAdmin};
+  (P[r]||pageHome)();
+  window.scrollTo(0,0);
+}
+function shell(mainHtml, {sidebar=true, selected=null}={}){
+  $("#app").innerHTML = sidebar
+    ? `<div class="layout"><aside>${sidebarHtml(selected)}</aside><main>${mainHtml}</main></div>`
+    : `<div class="layout full"><main>${mainHtml}</main></div>`;
+  if(sidebar) $("#g-search")?.addEventListener("input", e=>{ $("#glist").innerHTML=gameListHtml(e.target.value, selected); });
+}
+function sidebarHtml(selected){ return `<div class="side-title">게임 목록 <small>${games.length}</small></div>
+  <div class="search">🔍 <input id="g-search" placeholder="게임 이름 또는 약칭 검색"></div>
+  <div class="side-sub"><span>기록 많은 순</span><span>${games.length}개</span></div><div class="glist" id="glist">${gameListHtml("",selected)}</div>`; }
+function sortedGames(q){ q=(q||"").toLowerCase(); return games.filter(g=>!q||g.name.toLowerCase().includes(q)||(g.abbr||"").toLowerCase().includes(q)||(g.genre||"").includes(q))
+  .sort((a,b)=>(gameStats[b.id]?.records||0)-(gameStats[a.id]?.records||0)||a.name.localeCompare(b.name)); }
+function gameListHtml(q,selected){ const list=sortedGames(q).slice(0,300);
+  return list.map((g,i)=>`<a href="#/game/${g.id}" class="${g.id===selected?"on":""}"><span class="no">${i+1}</span><span><div class="nm">${esc(g.name)}</div><div class="meta">${esc(g.genre||"")}${g.release_year?" · "+g.release_year:""} · 기록 ${gameStats[g.id]?.records||0}</div></span></a>`).join("")||`<div class="empty">검색 결과 없음</div>`; }
+
+// ======================= 홈 =======================
+async function pageHome(){
+  shell(`<div class="card" style="text-align:center;padding:40px"><div class="mini">불러오는 중…</div></div>`);
+  const [{data:recent},{data:rank},{data:hard},{count:recCount},{count:userCount}]=await Promise.all([
+    sb.from("records").select("*, profiles(nickname), games(name), categories(name)").order("achieved_at",{ascending:false}).limit(12),
+    sb.rpc("user_ranking"), sb.from("hardest").select("*, games(name)").order("position").limit(5),
+    sb.from("records").select("*",{count:"exact",head:true}), sb.from("profiles").select("*",{count:"exact",head:true})]);
+  shell(`
+  <div class="grid3" style="margin-bottom:20px">
+    <div class="card stat"><div class="n">${games.length.toLocaleString()}</div><div class="l">등록된 게임</div></div>
+    <div class="card stat"><div class="n">${(recCount||0).toLocaleString()}</div><div class="l">고정된 기록</div></div>
+    <div class="card stat"><div class="n">${(userCount||0).toLocaleString()}</div><div class="l">러너</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h2>🕒 최근 고정된 기록</h2>
+      ${recent?.length?`<table><tr><th>게임</th><th>카테고리</th><th>유저</th><th>기록</th><th>날짜</th></tr>${recent.map(r=>`<tr><td><a href="#/game/${r.game_id}"><b>${esc(r.games?.name)}</b></a></td><td>${esc(r.categories?.name)}</td><td><a class="user-link" href="#/user/${encodeURIComponent(r.profiles?.nickname)}">${esc(r.profiles?.nickname)}</a></td><td class="mono">${fmt(r.time_ms)}</td><td class="mini">${fmtDate(r.achieved_at)}</td></tr>`).join("")}</table>`:`<div class="empty">아직 기록이 없어요. 첫 기록을 제출해보세요!</div>`}
+      <div style="margin-top:16px"><a class="btn" href="#/submit">＋ 기록 제출</a></div></div>
+    <div>
+      <div class="card" style="margin-bottom:20px"><h2>🏆 유저 랭킹 TOP 5</h2>
+        ${rank?.length?rank.slice(0,5).map(u=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f2f4"><span class="rank-badge rank-${u.rank}">${u.rank}</span><a class="user-link" href="#/user/${encodeURIComponent(u.nickname)}" style="flex:1">${esc(u.nickname)}</a><span class="mini">TOP100 기록 <b>${u.top100}</b>개</span></div>`).join(""):`<div class="empty">아직 없음</div>`}
+        <a href="#/ranking" class="mini" style="display:block;margin-top:10px">전체 보기 →</a></div>
+      <div class="card"><h2>🔥 최고 난이도 스피드런</h2>
+        ${hard?.length?hard.map(h=>`<div style="padding:8px 0;border-bottom:1px solid #f1f2f4"><b>#${h.position}</b> ${esc(h.title)} <span class="mini">· ${esc(h.games?.name||"")}</span></div>`).join(""):`<div class="empty">관리자가 아직 등록하지 않았어요</div>`}
+        <a href="#/hardest" class="mini" style="display:block;margin-top:10px">전체 보기 →</a></div>
+    </div>
+  </div>`);
+}
+
+// ======================= 게임 목록 / 상세 =======================
+function pageGames(){ shell(`<h1>모든 게임</h1><p class="sub">왼쪽 목록에서 게임을 고르거나 검색하세요. 원하는 게임이 없으면 <a href="#/submit">기록 제출</a>에서 "게임 추가 요청"을 보내주세요.</p>
+  <div class="card"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">${sortedGames("").slice(0,60).map(g=>`<a href="#/game/${g.id}" class="tag" style="padding:12px"><b>${esc(g.name)}</b><div class="mini">${esc(g.genre||"")} · 기록 ${gameStats[g.id]?.records||0}</div></a>`).join("")}</div></div>`); }
+
+async function pageGame(id, catId){
+  const g=games.find(x=>x.id===id); if(!g) return shell(`<div class="empty">게임을 찾을 수 없어요</div>`);
+  const {data:cats}=await sb.from("categories").select("*").eq("game_id",id).order("id");
+  const cat=cats?.find(c=>String(c.id)===String(catId))||cats?.[0];
+  const {data:lb}=cat?await sb.rpc("leaderboard",{p_category:cat.id}):{data:[]};
+  const idx=sortedGames("").findIndex(x=>x.id===id)+1;
+  const wr=lb?.[0];
+  shell(`
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+    <div><h1><span class="rank">#${idx}</span>${esc(g.name)}</h1>
+      <p class="sub">장르 <b>${esc(g.genre||"-")}</b> · 출시 <b>${g.release_year||"-"}</b> · 플랫폼 <b>${esc(g.platforms||"-")}</b>${g.src_id?` · <a href="https://www.speedrun.com/${esc(g.abbr)}" target="_blank">speedrun.com ↗</a>`:""}</p></div>
+    <a class="btn" href="#/submit/${g.id}" style="padding:14px 22px;font-size:15px">＋ 기록 제출</a>
+  </div>
+  <div class="tabs">${(cats||[]).map(c=>`<button class="${c.id===cat?.id?"on":""}" onclick="location.hash='#/game/${g.id}/${c.id}'">${esc(c.name)}</button>`).join("")||"<span class='mini'>카테고리 없음</span>"}</div>
+  <div class="grid2">
+    <div>
+      ${wr?`<div class="card" style="margin-bottom:20px;padding:0;overflow:hidden">${ytId(wr.video_url)?`<div style="position:relative;padding-top:56.25%"><iframe style="position:absolute;inset:0;width:100%;height:100%;border:0" src="https://www.youtube.com/embed/${ytId(wr.video_url)}" allowfullscreen></iframe></div>`:""}
+        <div style="padding:14px 18px;display:flex;justify-content:space-between;align-items:center"><div><span class="mini">🥇 세계 기록 (포럼)</span><div style="font-size:22px" class="mono">${fmt(wr.time_ms)}</div></div><a class="user-link" href="#/user/${encodeURIComponent(wr.nickname)}">${esc(wr.nickname)}</a></div></div>`:""}
+      <div class="card"><h2>등재 기록 <span class="badge b-admin">${lb?.length||0}</span> <span class="mini">— ${esc(cat?.name||"")}</span></h2>
+      ${lb?.length?`<table><tr><th>#</th><th>유저</th><th>기록</th><th>플레이 환경</th><th>날짜</th><th>영상</th></tr>${lb.map(r=>`<tr><td><span class="rank-badge rank-${r.rank}">${r.rank}</span>${r.manual_rank?' <span class="mini" title="관리자 고정 순위">📌</span>':''}</td><td><a class="user-link" href="#/user/${encodeURIComponent(r.nickname)}">${esc(r.nickname)}</a></td><td class="mono">${fmt(r.time_ms)}</td><td class="mini">${esc(r.platform||"-")}</td><td class="mini">${fmtDate(r.achieved_at)}</td><td>${r.video_url?`<a class="yt" href="${esc(r.video_url)}" target="_blank">▶ 보기</a>`:"-"}</td></tr>`).join("")}</table>`:`<div class="empty">아직 등재된 기록이 없습니다.</div>`}
+      <div class="mini" style="margin-top:10px">${lb?.length||0}개 기록</div></div>
+    </div>
+    <div class="card"><h2>ⓘ 게임 정보</h2>
+      <div class="info">
+        <div><div class="k">약칭</div><div class="v">${esc(g.abbr||"-")}</div></div>
+        <div><div class="k">기록 수</div><div class="v">${gameStats[g.id]?.records||0}</div></div>
+        <div><div class="k">러너 수</div><div class="v">${gameStats[g.id]?.runners||0}</div></div>
+        <div><div class="k">카테고리</div><div class="v">${cats?.length||0}개</div></div>
+        <div><div class="k">1위 기록</div><div class="v">${wr?fmt(wr.time_ms):"-"}</div></div>
+        <div><div class="k">인정 기준</div><div class="v">유튜브 영상</div></div>
+      </div>
+      <div class="k mini" style="margin-top:18px">카테고리 규칙</div><div style="margin-top:6px">${esc(cat?.rules||"기본 규칙: 타이머 표시, 무편집 원본 영상 필수, 치트 금지")}</div>
+      <div class="tags">${[g.genre, g.release_year?g.release_year+"년 출시":null, (gameStats[g.id]?.records||0)===0?"첫 기록 도전 가능":null, wr?"WR 보유자 "+wr.nickname:null].filter(Boolean).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
+      ${g.cover_url?`<img src="${esc(g.cover_url)}" style="width:100%;border-radius:10px;margin-top:16px" alt="">`:""}
+    </div>
+  </div>`,{selected:id});
+}
+
+// ======================= 유저 랭킹 =======================
+async function pageRanking(){
+  const {data}=await sb.rpc("user_ranking");
+  shell(`<h1>유저 랭킹</h1><p class="sub">각 카테고리 <b>100위 안</b>에 드는 등재 기록이 많은 순서입니다. (동률이면 1위 기록 수 → 전체 기록 수)</p>
+  <div class="card">${data?.length?`<table><tr><th>#</th><th>유저</th><th>TOP100 기록</th><th>1위(WR)</th><th>전체 기록</th></tr>${data.map(u=>`<tr><td><span class="rank-badge rank-${u.rank}">${u.rank}</span>${u.manual_rank?' 📌':''}</td><td><a class="user-link" href="#/user/${encodeURIComponent(u.nickname)}"><span class="avatar" style="margin-right:8px">${esc(u.nickname[0])}</span>${esc(u.nickname)}</a></td><td class="mono">${u.top100}</td><td class="mono">${u.wr}</td><td class="mono">${u.total}</td></tr>`).join("")}</table>`:`<div class="empty">아직 랭킹이 없어요</div>`}</div>`,{sidebar:false});
+}
+
+// ======================= 최고 난이도 =======================
+async function pageHardest(){
+  const {data}=await sb.from("hardest").select("*, games(name), categories(name), profiles:holder_user_id(nickname)").order("position");
+  shell(`<h1>최고 난이도 스피드런 리스트</h1><p class="sub">관리자가 선정한 한국에서 가장 어려운 스피드런. 순위가 높을수록 어렵습니다.</p>
+  ${data?.length?data.map(h=>`<div class="hard-item"><div class="pos">#${h.position}</div><div><div class="t">${esc(h.title)}</div><div class="d">${esc(h.games?.name||"")}${h.categories?` · ${esc(h.categories.name)}`:""}${h.profiles?` · 보유자 <a class="user-link" href="#/user/${encodeURIComponent(h.profiles.nickname)}">${esc(h.profiles.nickname)}</a>`:""}</div>${h.description?`<div class="d">${esc(h.description)}</div>`:""}</div><div style="display:flex;gap:8px;align-items:center"><span class="pts">${h.points} pt</span>${h.video_url?`<a class="yt" href="${esc(h.video_url)}" target="_blank">▶ 영상</a>`:""}${h.game_id?`<a class="btn ghost sm" href="#/game/${h.game_id}${h.category_id?"/"+h.category_id:""}">리더보드</a>`:""}</div></div>`).join(""):`<div class="card empty">아직 등록된 항목이 없어요. 관리자 탭 → 최고 난이도에서 추가하세요.</div>`}`,{sidebar:false});
+}
+
+// ======================= 도구 =======================
+function pageTools(){
+  shell(`<h1>도구</h1><p class="sub">뽑기·타이머·계산기. 심심할 때 랜덤 도전!</p>
+  <div class="tabs"><button class="on" onclick="toolTab(this,'t-gacha')">🎰 랜덤 게임 뽑기</button><button onclick="toolTab(this,'t-timer')">⏱ 스피드런 타이머</button><button onclick="toolTab(this,'t-calc')">🧮 시간 계산기</button><button onclick="toolTab(this,'t-roulette')">🎯 챌린지 룰렛</button></div>
+  <div id="t-gacha" class="card"><div class="gacha-box">
+    <div class="gacha-card" id="gacha-card"><div style="font-size:40px">🎁</div><div class="mini">버튼을 눌러 뽑기!</div></div>
+    <div class="admin-row"><button class="btn" onclick="gacha()">뽑기 (1회)</button><button class="btn ghost" onclick="gacha(10)">10연차</button></div>
+    <div class="mini">희귀도: <span style="color:#9ca3af">● 일반 60%</span> <span style="color:#3b82f6">● 레어 27%</span> <span style="color:#8b5cf6">● 에픽 10%</span> <span style="color:#f59e0b">● 전설 3%</span> — 전설이면 기록 수가 가장 많은 인기 게임!</div>
+    <div id="gacha-log" style="width:100%"></div>
+  </div></div>
+  <div id="t-timer" class="card" style="display:none">
+    <div class="timer-big" id="tm">0:00.00</div>
+    <div class="admin-row" style="justify-content:center;margin-top:12px"><button class="btn" id="tm-start" onclick="tmToggle()">시작 (Space)</button><button class="btn ghost" onclick="tmSplit()">스플릿 (S)</button><button class="btn ghost" onclick="tmReset()">리셋 (R)</button></div>
+    <div class="mini" style="text-align:center;margin-top:8px">키보드: Space 시작/정지 · S 스플릿 · R 리셋</div>
+    <table class="splits" id="tm-splits"></table>
+  </div>
+  <div id="t-calc" class="card" style="display:none">
+    <div class="row2"><div class="field"><label>기록 A</label><input id="c-a" placeholder="예: 1:23:45.67"></div><div class="field"><label>기록 B</label><input id="c-b" placeholder="예: 1:20:00"></div></div>
+    <div class="admin-row"><button class="btn" onclick="calc('diff')">차이 (A−B)</button><button class="btn ghost" onclick="calc('sum')">합계 (A+B)</button><button class="btn ghost" onclick="calc('pct')">A 대비 B 단축률</button><button class="btn ghost" onclick="calc('ms')">밀리초 변환</button></div>
+    <div id="c-out" style="margin-top:16px;font-size:22px" class="mono"></div>
+  </div>
+  <div id="t-roulette" class="card" style="display:none">
+    <div class="gacha-box"><div class="gacha-card" id="rou-card"><div style="font-size:40px">🎯</div><div class="mini">오늘의 챌린지를 뽑아보세요</div></div><button class="btn" onclick="roulette()">룰렛 돌리기</button></div>
+  </div>`,{sidebar:false});
+  document.onkeydown=e=>{ if($("#t-timer")?.style.display==="none"||/INPUT|TEXTAREA/.test(e.target.tagName)) return; if(e.code==="Space"){e.preventDefault();tmToggle();} if(e.key==="s"||e.key==="S") tmSplit(); if(e.key==="r"||e.key==="R") tmReset(); };
+}
+function toolTab(btn,id){ document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("on")); btn.classList.add("on"); ["t-gacha","t-timer","t-calc","t-roulette"].forEach(t=>$("#"+t).style.display=t===id?"":"none"); }
+function pickRarity(){ const r=Math.random(); return r<.03?"legend":r<.13?"epic":r<.40?"rare":"common"; }
+function gachaOne(){ const rar=pickRarity(); const pool=sortedGames(""); let g;
+  if(rar==="legend") g=pool.slice(0,Math.max(5,Math.ceil(pool.length*.03)))[Math.floor(Math.random()*Math.max(5,Math.ceil(pool.length*.03)))];
+  else if(rar==="epic") g=pool.slice(0,Math.ceil(pool.length*.15))[Math.floor(Math.random()*Math.ceil(pool.length*.15))];
+  else if(rar==="rare") g=pool.slice(0,Math.ceil(pool.length*.5))[Math.floor(Math.random()*Math.ceil(pool.length*.5))];
+  else g=pool[Math.floor(Math.random()*pool.length)];
+  return {rar,g}; }
+const RAR_KO={common:"일반",rare:"레어",epic:"에픽",legend:"전설"};
+async function gacha(n=1){ const card=$("#gacha-card"); card.className="gacha-card spin"; card.innerHTML=`<div style="font-size:40px">🎲</div><div class="mini">두구두구…</div>`;
+  await new Promise(r=>setTimeout(r,900)); const res=Array.from({length:n},gachaOne); const best=res.sort((a,b)=>["common","rare","epic","legend"].indexOf(b.rar)-["common","rare","epic","legend"].indexOf(a.rar))[0];
+  card.className="gacha-card r-"+best.rar; card.innerHTML=`<div class="mini">${RAR_KO[best.rar]}${best.rar==="legend"?" ✨":""}</div><div style="font-size:22px;font-weight:900">${esc(best.g.name)}</div><div class="mini">${esc(best.g.genre||"")} · 기록 ${gameStats[best.g.id]?.records||0}개</div><a class="btn sm" href="#/game/${best.g.id}" style="margin-top:8px">이 게임 도전하기 →</a>`;
+  if(n>1) $("#gacha-log").innerHTML=`<table><tr><th>#</th><th>희귀도</th><th>게임</th></tr>${res.map((r,i)=>`<tr><td>${i+1}</td><td><span class="badge" style="background:${{common:"#e5e7eb",rare:"#dbeafe",epic:"#ede9fe",legend:"#fef3c7"}[r.rar]}">${RAR_KO[r.rar]}</span></td><td><a href="#/game/${r.g.id}">${esc(r.g.name)}</a></td></tr>`).join("")}</table>`; else $("#gacha-log").innerHTML=""; }
+const CHALLENGES=["마우스 반전으로 클리어","키보드 한 손만 사용","1시간 안에 새 게임 Any% 완주","지금 가챠에서 뽑힌 게임 WR 영상 안 보고 도전","세이브 없이 완주","음소거 플레이","자신의 PB를 5% 단축","가장 기록 적은 게임의 첫 기록 되기","채팅 추천 게임 즉석 도전","도구 탭 타이머로 10분 챌린지"];
+function roulette(){ const c=$("#rou-card"); c.className="gacha-card spin"; setTimeout(()=>{ c.className="gacha-card r-rare"; const {g}=gachaOne(); c.innerHTML=`<div class="mini">오늘의 챌린지</div><div style="font-size:19px;font-weight:900">${esc(CHALLENGES[Math.floor(Math.random()*CHALLENGES.length)])}</div><div class="mini">대상 게임: <a href="#/game/${g.id}">${esc(g.name)}</a></div>`; },800); }
+let tmRun=false, tmStart=0, tmAcc=0, tmRaf=null, tmSplits=[];
+function tmTick(){ $("#tm").textContent=fmt(tmAcc+(tmRun?performance.now()-tmStart:0)); if(tmRun) tmRaf=requestAnimationFrame(tmTick); }
+function tmToggle(){ if(tmRun){ tmAcc+=performance.now()-tmStart; tmRun=false; cancelAnimationFrame(tmRaf); $("#tm-start").textContent="재개 (Space)"; tmTick(); } else { tmRun=true; tmStart=performance.now(); $("#tm-start").textContent="정지 (Space)"; tmTick(); } }
+function tmSplit(){ if(!tmRun) return; const t=tmAcc+performance.now()-tmStart; const prev=tmSplits.length?tmSplits[tmSplits.length-1]:0; tmSplits.push(t); $("#tm-splits").innerHTML=`<tr><th>#</th><th>구간</th><th>누적</th></tr>`+tmSplits.map((s,i)=>`<tr><td>${i+1}</td><td class="mono">${fmt(s-(i?tmSplits[i-1]:0))}</td><td class="mono">${fmt(s)}</td></tr>`).join(""); }
+function tmReset(){ tmRun=false; cancelAnimationFrame(tmRaf); tmAcc=0; tmSplits=[]; $("#tm").textContent="0:00.00"; $("#tm-splits").innerHTML=""; $("#tm-start").textContent="시작 (Space)"; }
+function calc(op){ const a=parseTime($("#c-a").value), b=parseTime($("#c-b").value); const o=$("#c-out");
+  if(op==="ms") return o.textContent=a==null?"기록 A 형식 오류":`${a.toLocaleString()} ms`;
+  if(a==null||b==null) return o.textContent="두 기록을 모두 입력하세요 (예: 1:23.45)";
+  if(op==="diff") o.textContent=(a-b>=0?"+":"−")+fmt(Math.abs(a-b)); if(op==="sum") o.textContent=fmt(a+b); if(op==="pct") o.textContent=((a-b)/a*100).toFixed(2)+"% 단축 (A→B)"; }
+
+// ======================= 기록 제출 =======================
+async function pageSubmit(gameId){
+  if(!me){ shell(`<div class="card" style="max-width:600px;margin:40px auto;text-align:center"><h2>기록을 제출하려면 로그인이 필요해요</h2><p class="mini">아직 포럼 계정이 없다면 닉네임으로 새 계정을 만들어 주세요.</p><button class="btn" onclick="authModal('login')">로그인</button> <button class="btn ghost" onclick="authModal('signup')">회원가입</button></div>`,{sidebar:false}); return; }
+  const {count}=await sb.from("submissions").select("*",{count:"exact",head:true}).eq("user_id",me.id).gte("created_at",new Date(Date.now()-7*864e5).toISOString());
+  const g=games.find(x=>x.id===+gameId);
+  shell(`<div style="max-width:1100px;margin:0 auto"><h1>기록 제출</h1><p class="sub">제출 후 관리자(또는 관리자 부재 시 AI 심사관)가 영상을 확인하고 <b>제출 완료</b> / <b>접수 폐기</b>를 결정합니다. 제출 완료되면 1분 이내에 리더보드에 자동으로 고정됩니다.</p>
+  <div class="guide"><label style="display:flex;gap:10px;align-items:center;font-weight:700"><input type="checkbox" id="s-agree"> 등재 가이드라인을 읽었고 이에 동의합니다 <a href="javascript:void(0)" onclick="openModal('<h2>등재 가이드라인</h2><p style=white-space:pre-wrap>'+esc(settings.guideline||'')+'</p><button class=btn onclick=closeModal()>닫기</button>')">다시 보기</a></label></div>
+  <div class="field"><label>신청 종류</label><select id="s-type" onchange="$('#s-rec').style.display=this.value==='record'?'':'none';$('#s-game-req').style.display=this.value==='record'?'none':''"><option value="record">스피드런 기록 등재</option><option value="game">게임 추가 요청</option></select>
+    <div class="hint">기록 등재는 계정당 최근 7일 동안 최대 10개까지 신청할 수 있습니다. (현재 ${count||0}/10, 승인·거절된 신청도 포함)</div></div>
+  <div class="field"><label>닉네임</label><input value="${esc(profile?.nickname)}" disabled><div class="hint">프로필 닉네임으로 제출됩니다.</div></div>
+  <div id="s-game-req" style="display:none"><div class="field"><label>추가할 게임 이름 <small>필수</small></label><input id="s-newgame" placeholder="예: Pizza Tower"></div><div class="field"><label>카테고리 / 설명</label><textarea id="s-newgame-note" rows="3" placeholder="Any%, 100% 등 + speedrun.com 링크가 있으면 적어주세요"></textarea></div><button class="btn" onclick="submitGameReq()">게임 추가 요청 보내기</button></div>
+  <div id="s-rec">
+  <div class="row2">
+    <div class="field"><label>게임 <small>필수</small></label><input id="s-game" list="gamelist" placeholder="게임 이름 검색" value="${esc(g?.name||"")}" oninput="onGamePick()"><datalist id="gamelist">${games.map(x=>`<option value="${esc(x.name)}">`).join("")}</datalist><div class="hint">목록에서 게임을 선택해 주세요.</div></div>
+    <div class="field"><label>카테고리 <small>필수</small></label><select id="s-cat"><option value="">게임을 먼저 선택</option></select><div class="hint" id="s-cat-hint">카테고리별 1위 기록이 여기에 표시됩니다.</div></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>기록 시간 <small>필수</small></label><input id="s-time" placeholder="예: 1:23:45.67 또는 12:34.56" oninput="$('#s-time-hint').textContent=parseTime(this.value)==null?'형식: 시:분:초.밀리초':'= '+fmt(parseTime(this.value))"><div class="hint" id="s-time-hint">형식: 시:분:초.밀리초</div></div>
+    <div class="field"><label>사용한 기기 / 플랫폼</label><select id="s-platform"><option>PC</option><option>Nintendo Switch</option><option>PlayStation</option><option>Xbox</option><option>Android</option><option>iOS</option><option>에뮬레이터</option><option>기타</option></select></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>게임 버전</label><input id="s-version" placeholder="예: 1.21.4 / 최신 / NTSC"></div>
+    <div class="field"><label>사용한 FPS 혹은 TPS</label><input id="s-fps" type="number" placeholder="예: 60" min="1" max="65535"><div class="hint">1–65,535 사이 정수</div></div>
+  </div>
+  <div class="field"><label>타이머 프로그램</label><select id="s-timer"><option>LiveSplit</option><option>인게임 타이머</option><option>LLanfair</option><option>Speedrun Timer(모바일)</option><option>없음</option><option>기타</option></select></div>
+  <div class="field"><label>공개 기록 영상 링크 <small>필수</small></label><input id="s-video" placeholder="https://www.youtube.com/watch?v=..."><div class="hint">YouTube 영상 링크만 제출할 수 있습니다. (AI 심사관이 영상을 직접 시청합니다 — 비공개/일부공개 영상은 심사 불가)</div></div>
+  <div class="guide"><div style="font-weight:800;margin-bottom:10px">무편집 원본 영상 <small style="color:var(--bad)">필수</small></div>
+    <div class="field" style="margin:0"><label>무편집 원본 영상 URL</label><input id="s-raw" placeholder="https://..."><div class="hint">편집하지 않은 원본 녹화 (유튜브 일부공개, 구글 드라이브, 트위치 VOD 등). 공개 영상과 같다면 같은 링크를 넣어도 됩니다.</div></div></div>
+  <div class="field"><label>비고</label><textarea id="s-note" rows="3" placeholder="심사관에게 전할 말 (사용한 글리치, 타이머 시작/종료 기준 등)"></textarea></div>
+  <button class="btn" style="padding:14px 28px;font-size:16px" onclick="submitRecord()">＋ 기록 제출</button>
+  </div></div>`,{sidebar:false});
+  if(g) onGamePick();
+}
+async function onGamePick(){ const name=$("#s-game").value; const g=games.find(x=>x.name===name); const sel=$("#s-cat"); if(!g){ sel.innerHTML=`<option value="">게임을 먼저 선택</option>`; return; }
+  const {data}=await sb.from("categories").select("*").eq("game_id",g.id).order("id"); sel.innerHTML=(data||[]).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")||`<option value="">카테고리 없음 (관리자에게 요청)</option>`; sel.onchange=showWr; showWr(); }
+async function showWr(){ const cid=+$("#s-cat").value; if(!cid) return; const {data}=await sb.rpc("leaderboard",{p_category:cid}); $("#s-cat-hint").textContent=data?.length?`현재 1위: ${fmt(data[0].time_ms)} (${data[0].nickname}) · 등재 ${data.length}개`:"아직 기록이 없는 카테고리 — 첫 기록이 됩니다!"; }
+async function submitRecord(){
+  if(!$("#s-agree").checked) return toast("가이드라인 동의가 필요해요");
+  const g=games.find(x=>x.name===$("#s-game").value); if(!g) return toast("목록에서 게임을 선택하세요");
+  const category_id=+$("#s-cat").value; if(!category_id) return toast("카테고리를 선택하세요");
+  const time_ms=parseTime($("#s-time").value); if(!time_ms) return toast("기록 시간 형식이 잘못됐어요");
+  const video_url=$("#s-video").value.trim(); if(!isYt(video_url)) return toast("YouTube 링크만 제출할 수 있어요");
+  const raw_video_url=$("#s-raw").value.trim(); if(!raw_video_url) return toast("무편집 원본 영상 링크가 필요해요");
+  const fps=$("#s-fps").value?+$("#s-fps").value:null;
+  const {error}=await sb.from("submissions").insert({user_id:me.id, game_id:g.id, category_id, time_ms, game_version:$("#s-version").value||null, platform:$("#s-platform").value, fps, timer_tool:$("#s-timer").value, video_url, raw_video_url, note:$("#s-note").value||null});
+  if(error) return toast("제출 실패: "+(error.message.includes("policy")?"7일 10개 제한 또는 정지된 계정":error.message), 4000);
+  toast("제출 완료! 심사 후 리더보드에 반영됩니다."); location.hash="#/me";
+}
+async function submitGameReq(){ const name=$("#s-newgame").value.trim(); if(!name) return toast("게임 이름을 입력하세요");
+  // 게임 추가 요청은 "게임 추가 요청" 전용 게임/카테고리 행에 기록 (관리자 탭에서 확인)
+  let {data:req}=await sb.from("games").select("id").eq("abbr","__requests").maybeSingle();
+  if(!req){ return toast("관리자가 아직 '게임 추가 요청함'을 활성화하지 않았어요. 관리자에게 디스코드로 알려주세요!",4000); }
+  const {data:cat}=await sb.from("categories").select("id").eq("game_id",req.id).limit(1).single();
+  const {error}=await sb.from("submissions").insert({user_id:me.id, game_id:req.id, category_id:cat.id, time_ms:1, video_url:"https://www.youtube.com/", raw_video_url:"-", note:`[게임 추가 요청] ${name}\n${$("#s-newgame-note").value}`});
+  if(error) return toast("요청 실패: "+error.message); toast("게임 추가 요청을 보냈어요!"); location.hash="#/me"; }
+
+// ======================= 내 제출 =======================
+async function pageMe(){
+  if(!me) return pageSubmit();
+  const {data}=await sb.from("submissions").select("*, games(name), categories(name)").eq("user_id",me.id).order("created_at",{ascending:false});
+  const ST={pending:"심사 대기",approved:"제출 완료 (고정 대기)",published:"고정됨",rejected:"접수 폐기"};
+  shell(`<h1>내 제출</h1><p class="sub">심사 결과는 여기서 확인할 수 있어요. 승인되면 1분 이내에 리더보드에 고정됩니다.</p>
+  <div class="card">${data?.length?`<table><tr><th>#</th><th>게임</th><th>카테고리</th><th>기록</th><th>상태</th><th>심사</th><th>사유</th><th>제출일</th><th></th></tr>${data.map(s=>`<tr><td class="mini">${s.id}</td><td><a href="#/game/${s.game_id}/${s.category_id}">${esc(s.games?.name)}</a></td><td>${esc(s.categories?.name)}</td><td class="mono">${fmt(s.time_ms)}</td><td><span class="badge b-${s.status}">${ST[s.status]}</span></td><td>${s.decided_by?`<span class="badge b-${s.decided_by}">${s.decided_by==="ai"?"AI":"관리자"}</span>`:"-"}</td><td class="mini" style="max-width:260px">${esc(s.decision_reason||"")}</td><td class="mini">${fmtDT(s.created_at)}</td><td>${s.status==="pending"?`<button class="btn ghost sm" onclick="cancelSub(${s.id})">취소</button>`:""}</td></tr>`).join("")}</table>`:`<div class="empty">제출한 기록이 없어요. <a href="#/submit">지금 제출하기</a></div>`}</div>`,{sidebar:false});
+  window._poll=setInterval(()=>{ if(location.hash.startsWith("#/me")) pageMe(); },20000);
+}
+async function cancelSub(id){ if(!confirm("이 제출을 취소할까요?")) return; await sb.from("submissions").delete().eq("id",id); pageMe(); }
+
+// ======================= 유저 프로필 =======================
+async function pageUser(nick){
+  const {data:u}=await sb.from("profiles").select("*").eq("nickname",nick).maybeSingle(); if(!u) return shell(`<div class="empty">유저를 찾을 수 없어요</div>`,{sidebar:false});
+  const [{data:recs},{data:rank}]=await Promise.all([sb.from("records").select("*, games(name), categories(name)").eq("user_id",u.id).order("achieved_at",{ascending:false}), sb.rpc("user_ranking")]);
+  const r=rank?.find(x=>x.user_id===u.id);
+  // 각 기록의 순위 계산
+  const ranked=await Promise.all((recs||[]).map(async rec=>{ const {data:lb}=await sb.rpc("leaderboard",{p_category:rec.category_id}); return {...rec, rank:lb?.find(x=>x.record_id===rec.id)?.rank||"-", total:lb?.length||0}; }));
+  shell(`<div style="display:flex;align-items:center;gap:16px"><span class="avatar" style="width:64px;height:64px;line-height:64px;font-size:28px;border-radius:14px">${esc(u.nickname[0])}</span><div><h1>${esc(u.nickname)} ${u.role==="admin"?'<span class="badge b-admin">관리자</span>':''}${u.banned?'<span class="badge b-rejected">정지</span>':''}</h1><div class="mini">가입 ${fmtDate(u.created_at)}</div></div></div>
+  <div class="grid3" style="margin:20px 0"><div class="card stat"><div class="n">${r?"#"+r.rank:"-"}</div><div class="l">유저 랭킹</div></div><div class="card stat"><div class="n">${r?.top100||0}</div><div class="l">TOP100 기록</div></div><div class="card stat"><div class="n">${r?.wr||0}</div><div class="l">1위 기록</div></div></div>
+  <div class="card"><h2>깬 기록 <span class="badge b-admin">${ranked.length}</span></h2>${ranked.length?`<table><tr><th>순위</th><th>게임</th><th>카테고리</th><th>기록</th><th>날짜</th><th>영상</th></tr>${ranked.map(x=>`<tr><td><span class="rank-badge rank-${x.rank}">${x.rank}</span> <span class="mini">/ ${x.total}</span></td><td><a href="#/game/${x.game_id}/${x.category_id}"><b>${esc(x.games?.name)}</b></a></td><td>${esc(x.categories?.name)}</td><td class="mono">${fmt(x.time_ms)}</td><td class="mini">${fmtDate(x.achieved_at)}</td><td>${x.video_url?`<a class="yt" href="${esc(x.video_url)}" target="_blank">▶</a>`:"-"}</td></tr>`).join("")}</table>`:`<div class="empty">아직 고정된 기록이 없어요</div>`}</div>`,{sidebar:false});
+}
+
+// ======================= 관리자 =======================
+let adminTab="pending";
+async function pageAdmin(){
+  if(!isAdmin()) return shell(`<div class="card empty">관리자만 접근할 수 있어요</div>`,{sidebar:false});
+  await heartbeat(); await loadSettings();
+  const lastSeen=new Date(settings.admin_last_seen); const idle=(Date.now()-lastSeen)/60000;
+  shell(`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><h1>관리자</h1>
+    <div><span class="idle">🟢 관리자 활동 중 (이 탭이 열려 있는 동안 AI는 대기)</span> <span class="mini">AI 대리 심사: ${settings.ai_enabled==="true"?"켜짐":"꺼짐"} · 부재 기준 ${settings.admin_idle_minutes}분</span></div></div>
+  <div class="tabs" id="admin-tabs">${[["pending","📥 심사 대기"],["records","📋 기록 관리"],["users","👥 유저 관리"],["games","🎮 게임/카테고리"],["hardest","🔥 최고 난이도"],["ailog","🤖 AI 로그"],["settings","⚙️ 설정"]].map(([k,v])=>`<button class="${adminTab===k?"on":""}" onclick="adminTab='${k}';pageAdmin()">${v}</button>`).join("")}</div>
+  <div id="admin-body"><div class="mini">불러오는 중…</div></div>`,{sidebar:false});
+  ({pending:adPending, records:adRecords, users:adUsers, games:adGames, hardest:adHardest, ailog:adAiLog, settings:adSettings})[adminTab]();
+  window._poll=setInterval(()=>{ if(location.hash.startsWith("#/admin")&&adminTab==="pending") adPending(); },20000);
+}
+async function adPending(){
+  const {data}=await sb.from("submissions").select("*, games(name), categories(name), profiles(nickname)").in("status",["pending","approved","rejected"]).order("created_at",{ascending:false}).limit(100);
+  const pend=(data||[]).filter(s=>s.status==="pending"), done=(data||[]).filter(s=>s.status!=="pending");
+  const card=s=>`<div class="sub-card" id="sub-${s.id}"><div class="hd"><div><b style="font-size:17px">${esc(s.games?.name)}</b> · ${esc(s.categories?.name)} <span class="mono" style="font-size:18px;margin-left:8px">${fmt(s.time_ms)}</span></div>
+    <div><span class="badge b-${s.status}">${s.status}</span> ${s.decided_by?`<span class="badge b-${s.decided_by}">${s.decided_by==="ai"?"AI 판정":"관리자"}</span>`:""} <span class="mini">#${s.id} · ${fmtDT(s.created_at)}</span></div></div>
+    <div class="kv"><div><b>유저</b><a class="user-link" href="#/user/${encodeURIComponent(s.profiles?.nickname)}">${esc(s.profiles?.nickname)}</a></div><div><b>플랫폼</b>${esc(s.platform||"-")}</div><div><b>버전</b>${esc(s.game_version||"-")}</div><div><b>FPS</b>${s.fps||"-"}</div><div><b>타이머</b>${esc(s.timer_tool||"-")}</div>
+      <div><b>영상</b><a href="${esc(s.video_url)}" target="_blank">▶ 공개 영상</a></div><div><b>원본</b>${s.raw_video_url?`<a href="${esc(s.raw_video_url)}" target="_blank">🎬 무편집</a>`:"-"}</div></div>
+    ${s.note?`<div class="mini" style="white-space:pre-wrap;background:#f9fafb;padding:8px 10px;border-radius:8px">${esc(s.note)}</div>`:""}
+    ${s.decision_reason?`<div class="mini" style="margin-top:8px">사유: ${esc(s.decision_reason)}</div>`:""}
+    ${ytId(s.video_url)?`<details style="margin-top:8px"><summary class="mini" style="cursor:pointer">영상 미리보기</summary><div style="position:relative;padding-top:56.25%;margin-top:8px"><iframe style="position:absolute;inset:0;width:100%;height:100%;border:0" src="https://www.youtube.com/embed/${ytId(s.video_url)}" allowfullscreen></iframe></div></details>`:""}
+    <div class="admin-row" style="margin-top:12px"><input id="reason-${s.id}" placeholder="사유 (선택)" style="flex:1;min-width:200px;border:1px solid var(--line);border-radius:8px;padding:8px 10px">
+      ${s.status!=="approved"?`<button class="btn ok sm" onclick="decide(${s.id},'approve')">✔ 제출 완료 (승인)</button>`:""}
+      ${s.status!=="rejected"?`<button class="btn bad sm" onclick="decide(${s.id},'reject')">✖ 접수 폐기</button>`:""}
+      ${s.status==="approved"?`<button class="btn sm" onclick="publishNow()">⚡ 지금 바로 고정</button>`:""}</div></div>`;
+  $("#admin-body").innerHTML=`<div class="admin-row" style="margin-bottom:14px"><button class="btn ghost sm" onclick="adPending()">새로고침</button><button class="btn ghost sm" onclick="publishNow()">⚡ 승인된 기록 지금 고정</button><button class="btn ghost sm" onclick="aiNow()">🤖 AI에게 지금 심사 시키기</button></div>
+    <h2>대기 중 <span class="badge b-pending">${pend.length}</span></h2>${pend.map(card).join("")||`<div class="empty">대기 중인 제출이 없어요</div>`}
+    <h2 style="margin-top:24px">최근 처리됨</h2>${done.slice(0,20).map(card).join("")||`<div class="empty">없음</div>`}`;
+}
+async function decide(id, action){
+  const reason=$("#reason-"+id)?.value||null;
+  const {error}=await sb.rpc("decide_submission",{p_id:id,p_action:action,p_reason:reason}); if(error) return toast("실패: "+error.message);
+  if(action==="approve"){ toast("승인됨! 잠시 후 자동으로 리더보드에 고정됩니다."); const delay=(+settings.publish_delay_seconds||20)+3; setTimeout(async()=>{ await sb.rpc("publish_due"); await loadGames(); toast("✅ 기록이 리더보드에 고정됐어요"); if(location.hash.startsWith("#/admin")) adPending(); }, delay*1000); }
+  else toast("접수 폐기 처리됨");
+  adPending();
+}
+async function publishNow(){ const {data,error}=await sb.rpc("publish_due"); if(error) return toast(error.message); await loadGames(); toast(`${data||0}개 기록 고정 완료`); adPending(); }
+async function aiNow(){ toast("AI 심사 요청 중… (Edge Function 배포 필요)"); try{ const r=await fetch(`${SUPABASE_URL}/functions/v1/ai-review?force=1`,{method:"POST",headers:{"Content-Type":"application/json","x-cron-secret":settings.cron_secret_hint||"", Authorization:"Bearer "+SUPABASE_ANON_KEY},body:"{}"}); const j=await r.json(); toast("AI 결과: "+JSON.stringify(j).slice(0,120),5000); setTimeout(adPending,1500);}catch(e){ toast("호출 실패: "+e.message); } }
+
+async function adRecords(){
+  const q=$("#rec-q")?.value||"";
+  let qry=sb.from("records").select("*, profiles(nickname), games(name), categories(name)").order("id",{ascending:false}).limit(200);
+  const {data}=await qry;
+  const list=(data||[]).filter(r=>!q||r.games?.name.toLowerCase().includes(q.toLowerCase())||r.profiles?.nickname.toLowerCase().includes(q.toLowerCase()));
+  $("#admin-body").innerHTML=`<div class="admin-row" style="margin-bottom:12px"><input id="rec-q" placeholder="게임/유저 검색" value="${esc(q)}" oninput="adRecords()" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:260px"><span class="mini">📌 순위 고정: 숫자를 넣으면 그 순위로 강제 고정 (빈칸 = 자동)</span></div>
+  <div class="card" style="padding:0"><table><tr><th>ID</th><th>게임</th><th>카테고리</th><th>유저</th><th>기록</th><th>📌 고정 순위</th><th>날짜</th><th></th></tr>${list.map(r=>`<tr><td class="mini">${r.id}</td><td>${esc(r.games?.name)}</td><td>${esc(r.categories?.name)}</td><td>${esc(r.profiles?.nickname)}</td><td><input class="mono" value="${fmt(r.time_ms)}" style="width:120px;border:1px solid var(--line);border-radius:6px;padding:4px 6px" onchange="editRecTime(${r.id},this.value)"></td><td><input type="number" value="${r.manual_rank??""}" placeholder="자동" style="width:70px;border:1px solid var(--line);border-radius:6px;padding:4px 6px" onchange="setRecRank(${r.id},this.value)"></td><td class="mini">${fmtDate(r.achieved_at)}</td><td><button class="btn bad sm" onclick="delRec(${r.id})">삭제</button></td></tr>`).join("")}</table></div>`;
+  $("#rec-q").focus(); const v=$("#rec-q").value; $("#rec-q").value=""; $("#rec-q").value=v;
+}
+async function editRecTime(id,v){ const ms=parseTime(v); if(!ms) return toast("형식 오류"); await sb.from("records").update({time_ms:ms}).eq("id",id); toast("수정됨"); }
+async function setRecRank(id,v){ await sb.rpc("set_record_rank",{p_record:id,p_rank:v===""?null:+v}); toast(v===""?"자동 순위로":"순위 #"+v+" 고정"); }
+async function delRec(id){ if(!confirm("기록을 삭제할까요?")) return; await sb.from("records").delete().eq("id",id); await loadGames(); adRecords(); }
+
+async function adUsers(){
+  const [{data:users},{data:rank}]=await Promise.all([sb.from("profiles").select("*").order("created_at",{ascending:false}), sb.rpc("user_ranking")]);
+  const rk={}; (rank||[]).forEach(r=>rk[r.user_id]=r);
+  $("#admin-body").innerHTML=`<div class="mini" style="margin-bottom:10px">📌 유저 랭킹 순위 고정: 숫자를 넣으면 유저 랭킹에서 그 순위로 강제됩니다.</div><div class="card" style="padding:0"><table><tr><th>닉네임</th><th>역할</th><th>현재 랭킹</th><th>TOP100</th><th>📌 고정 순위</th><th>가입</th><th></th></tr>
+  ${(users||[]).map(u=>`<tr><td><a class="user-link" href="#/user/${encodeURIComponent(u.nickname)}">${esc(u.nickname)}</a> ${u.banned?'<span class="badge b-rejected">정지</span>':''}</td><td><select onchange="setRole('${u.id}',this.value)" ${u.id===me.id?"disabled":""}><option ${u.role==="user"?"selected":""} value="user">user</option><option ${u.role==="admin"?"selected":""} value="admin">admin</option></select></td><td>${rk[u.id]?"#"+rk[u.id].rank:"-"}</td><td>${rk[u.id]?.top100||0}</td><td><input type="number" value="${u.manual_rank??""}" placeholder="자동" style="width:70px;border:1px solid var(--line);border-radius:6px;padding:4px 6px" onchange="setUserRank('${u.id}',this.value)"></td><td class="mini">${fmtDate(u.created_at)}</td><td>${u.id!==me.id?`<button class="btn ${u.banned?"ok":"bad"} sm" onclick="banUser('${u.id}',${!u.banned})">${u.banned?"정지 해제":"정지"}</button> <button class="btn ghost sm" onclick="renameUser('${u.id}','${esc(u.nickname)}')">이름 변경</button>`:""}</td></tr>`).join("")}</table></div>`;
+}
+async function setRole(id,role){ await sb.from("profiles").update({role}).eq("id",id); toast("역할 변경됨"); }
+async function setUserRank(id,v){ await sb.rpc("set_user_rank",{p_user:id,p_rank:v===""?null:+v}); toast("저장됨"); }
+async function banUser(id,b){ await sb.from("profiles").update({banned:b}).eq("id",id); adUsers(); }
+async function renameUser(id,old){ const n=prompt("새 닉네임",old); if(!n||n===old) return; const {error}=await sb.from("profiles").update({nickname:n}).eq("id",id); if(error) return toast(error.message); adUsers(); }
+
+async function adGames(){
+  const sel=window._adGame||null; const g=games.find(x=>x.id===sel);
+  const {data:cats}=g?await sb.from("categories").select("*").eq("game_id",g.id).order("id"):{data:[]};
+  $("#admin-body").innerHTML=`<div class="grid2">
+  <div><div class="card" style="margin-bottom:16px"><h2>➕ 게임 직접 추가</h2><div class="row2"><div class="field"><label>이름</label><input id="ng-name"></div><div class="field"><label>약칭 (영문, 고유)</label><input id="ng-abbr" placeholder="예: pizzatower"></div></div>
+    <div class="row2"><div class="field"><label>장르</label><input id="ng-genre"></div><div class="field"><label>출시년도</label><input id="ng-year" type="number"></div></div>
+    <div class="field"><label>카테고리 (| 로 구분)</label><input id="ng-cats" placeholder="Any%|100%|All Bosses"></div><button class="btn" onclick="addGame()">추가</button></div>
+    <div class="card"><h2>🌐 speedrun.com 에서 가져오기</h2><div class="admin-row"><input id="src-q" placeholder="게임 이름 (영문)" style="flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 10px" onkeydown="if(event.key==='Enter')srcSearch()"><button class="btn" onclick="srcSearch()">검색</button></div><div id="src-out" style="margin-top:10px"></div>
+    <div class="mini" style="margin-top:8px">검색 → "가져오기"를 누르면 게임 + 공식 카테고리 + 커버 이미지가 자동으로 들어갑니다. (수천 개 게임 모두 가능)</div></div>
+    <div class="card" style="margin-top:16px"><h2>📨 게임 추가 요청함</h2><p class="mini">유저가 "게임 추가 요청"을 보낼 수 있게 하려면 요청함을 활성화하세요. 요청은 심사 대기 탭에 비고로 표시됩니다.</p><button class="btn ghost sm" onclick="enableReqBox()">요청함 활성화</button></div></div>
+  <div><div class="card"><h2>🎮 게임 선택 / 카테고리 편집</h2><select onchange="window._adGame=+this.value;adGames()" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px"><option value="">게임 선택…</option>${sortedGames("").map(x=>`<option value="${x.id}" ${x.id===sel?"selected":""}>${esc(x.name)}</option>`).join("")}</select>
+    ${g?`<div style="margin-top:14px"><div class="field"><label>이름</label><input id="eg-name" value="${esc(g.name)}"></div><div class="row2"><div class="field"><label>장르</label><input id="eg-genre" value="${esc(g.genre||"")}"></div><div class="field"><label>커버 URL</label><input id="eg-cover" value="${esc(g.cover_url||"")}"></div></div><div class="admin-row"><button class="btn sm" onclick="saveGame(${g.id})">저장</button><button class="btn bad sm" onclick="delGame(${g.id})">게임 삭제</button></div>
+    <h2 style="margin-top:18px">카테고리</h2>${(cats||[]).map(c=>`<div class="admin-row" style="margin-bottom:6px"><input value="${esc(c.name)}" onchange="renameCat(${c.id},this.value)" style="flex:1;border:1px solid var(--line);border-radius:6px;padding:6px 8px"><input placeholder="규칙" value="${esc(c.rules||"")}" onchange="ruleCat(${c.id},this.value)" style="flex:2;border:1px solid var(--line);border-radius:6px;padding:6px 8px"><button class="btn bad sm" onclick="delCat(${c.id})">삭제</button></div>`).join("")}
+    <div class="admin-row" style="margin-top:8px"><input id="nc-name" placeholder="새 카테고리" style="flex:1;border:1px solid var(--line);border-radius:6px;padding:6px 8px"><button class="btn sm" onclick="addCat(${g.id})">추가</button></div></div>`:""}</div></div></div>`;
+}
+async function addGame(){ const name=$("#ng-name").value.trim(), abbr=$("#ng-abbr").value.trim()||name.toLowerCase().replace(/[^a-z0-9]/g,""); if(!name) return toast("이름 필요");
+  const {data,error}=await sb.from("games").insert({name,abbr,genre:$("#ng-genre").value||null,release_year:$("#ng-year").value?+$("#ng-year").value:null}).select().single(); if(error) return toast(error.message);
+  const cats=$("#ng-cats").value.split("|").map(s=>s.trim()).filter(Boolean); if(cats.length) await sb.from("categories").insert(cats.map(n=>({game_id:data.id,name:n}))); else await sb.from("categories").insert({game_id:data.id,name:"Any%"});
+  await loadGames(); window._adGame=data.id; toast("게임 추가됨"); adGames(); }
+async function saveGame(id){ await sb.from("games").update({name:$("#eg-name").value,genre:$("#eg-genre").value||null,cover_url:$("#eg-cover").value||null}).eq("id",id); await loadGames(); toast("저장됨"); }
+async function delGame(id){ if(!confirm("게임과 모든 기록이 삭제됩니다. 계속?")) return; await sb.from("games").delete().eq("id",id); await loadGames(); window._adGame=null; adGames(); }
+async function addCat(gid){ const n=$("#nc-name").value.trim(); if(!n) return; await sb.from("categories").insert({game_id:gid,name:n}); adGames(); }
+async function renameCat(id,n){ await sb.from("categories").update({name:n}).eq("id",id); toast("저장됨"); }
+async function ruleCat(id,r){ await sb.from("categories").update({rules:r||null}).eq("id",id); toast("저장됨"); }
+async function delCat(id){ if(!confirm("카테고리와 그 기록이 삭제됩니다. 계속?")) return; await sb.from("categories").delete().eq("id",id); adGames(); }
+async function enableReqBox(){ const {data:ex}=await sb.from("games").select("id").eq("abbr","__requests").maybeSingle(); if(ex) return toast("이미 활성화됨");
+  const {data}=await sb.from("games").insert({name:"[게임 추가 요청함]",abbr:"__requests",genre:"시스템"}).select().single(); await sb.from("categories").insert({game_id:data.id,name:"요청"}); await loadGames(); toast("활성화됨"); }
+async function srcSearch(){ const q=$("#src-q").value.trim(); if(!q) return; $("#src-out").innerHTML="<div class='mini'>검색 중…</div>";
+  try{ const r=await fetch(`https://www.speedrun.com/api/v1/games?name=${encodeURIComponent(q)}&max=10`); const j=await r.json();
+    window._srcRes=j.data||[]; $("#src-out").innerHTML=window._srcRes.map((g,i)=>`<div class="admin-row" style="padding:6px 0;border-bottom:1px solid #f1f2f4"><img src="${esc(g.assets?.["cover-tiny"]?.uri||"")}" style="width:28px;height:38px;object-fit:cover;border-radius:4px"><span style="flex:1"><b>${esc(g.names.international)}</b> <span class="mini">${g.released||""} · ${esc(g.abbreviation)}</span></span><button class="btn sm" onclick="srcImport(${i})">가져오기</button></div>`).join("")||"<div class='mini'>결과 없음</div>";
+  }catch(e){ $("#src-out").innerHTML=`<div class="mini" style="color:var(--bad)">speedrun.com 접속 실패 (${esc(e.message)}). 직접 추가를 이용하세요.</div>`; } }
+async function srcImport(i){ const g=window._srcRes[i]; if(!g) return;
+  const {data:game,error}=await sb.from("games").upsert({name:g.names.international,abbr:g.abbreviation,cover_url:g.assets?.["cover-medium"]?.uri||null,release_year:g.released||null,src_id:g.id,platforms:null},{onConflict:"abbr"}).select().single(); if(error) return toast(error.message);
+  try{ const r=await fetch(`https://www.speedrun.com/api/v1/games/${g.id}/categories`); const j=await r.json(); const cats=(j.data||[]).filter(c=>c.type==="per-game").map(c=>({game_id:game.id,name:c.name,rules:(c.rules||"").slice(0,500)||null}));
+    if(cats.length) await sb.from("categories").upsert(cats,{onConflict:"game_id,name",ignoreDuplicates:true}); }catch{}
+  await loadGames(); window._adGame=game.id; toast(`${g.names.international} 가져옴`); adGames(); }
+
+async function adHardest(){
+  const {data}=await sb.from("hardest").select("*, games(name), categories(name), profiles:holder_user_id(nickname)").order("position");
+  $("#admin-body").innerHTML=`<div class="card" style="margin-bottom:16px"><h2>➕ 항목 추가</h2><div class="row2"><div class="field"><label>순위</label><input id="h-pos" type="number" value="${(data?.length||0)+1}"></div><div class="field"><label>제목</label><input id="h-title" placeholder="예: Celeste 200 Berries"></div></div>
+    <div class="row2"><div class="field"><label>게임</label><select id="h-game" onchange="hCats()"><option value="">선택</option>${sortedGames("").map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("")}</select></div><div class="field"><label>카테고리</label><select id="h-cat"><option value="">선택</option></select></div></div>
+    <div class="row2"><div class="field"><label>포인트</label><input id="h-pts" type="number" value="100"></div><div class="field"><label>보유자 닉네임 (선택)</label><input id="h-holder" placeholder="기록 보유자"></div></div>
+    <div class="field"><label>설명</label><input id="h-desc"></div><div class="field"><label>영상 URL</label><input id="h-video"></div><button class="btn" onclick="addHard()">추가</button></div>
+  <div class="card" style="padding:0"><table><tr><th>순위</th><th>제목</th><th>게임</th><th>포인트</th><th>보유자</th><th></th></tr>${(data||[]).map(h=>`<tr><td><input type="number" value="${h.position}" style="width:60px;border:1px solid var(--line);border-radius:6px;padding:4px" onchange="hardUpd(${h.id},{position:+this.value})"></td><td><input value="${esc(h.title)}" style="border:1px solid var(--line);border-radius:6px;padding:4px;width:100%" onchange="hardUpd(${h.id},{title:this.value})"></td><td>${esc(h.games?.name||"-")}${h.categories?" · "+esc(h.categories.name):""}</td><td><input type="number" value="${h.points}" style="width:70px;border:1px solid var(--line);border-radius:6px;padding:4px" onchange="hardUpd(${h.id},{points:+this.value})"></td><td>${esc(h.profiles?.nickname||"-")}</td><td><button class="btn bad sm" onclick="delHard(${h.id})">삭제</button></td></tr>`).join("")}</table></div>`;
+}
+async function hCats(){ const gid=+$("#h-game").value; const {data}=gid?await sb.from("categories").select("*").eq("game_id",gid):{data:[]}; $("#h-cat").innerHTML=`<option value="">선택</option>`+(data||[]).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(""); }
+async function addHard(){ const title=$("#h-title").value.trim(); if(!title) return toast("제목 필요"); let holder=null; const hn=$("#h-holder").value.trim(); if(hn){ const {data}=await sb.from("profiles").select("id").eq("nickname",hn).maybeSingle(); holder=data?.id||null; if(!holder) toast("보유자 닉네임을 찾지 못해 비워둠"); }
+  const {error}=await sb.from("hardest").insert({position:+$("#h-pos").value||1,title,game_id:+$("#h-game").value||null,category_id:+$("#h-cat").value||null,points:+$("#h-pts").value||100,description:$("#h-desc").value||null,video_url:$("#h-video").value||null,holder_user_id:holder}); if(error) return toast(error.message); adHardest(); }
+async function hardUpd(id,patch){ await sb.from("hardest").update(patch).eq("id",id); toast("저장됨"); }
+async function delHard(id){ await sb.from("hardest").delete().eq("id",id); adHardest(); }
+
+async function adAiLog(){ const {data}=await sb.from("ai_log").select("*").order("created_at",{ascending:false}).limit(50);
+  $("#admin-body").innerHTML=`<div class="card" style="padding:0"><table><tr><th>시간</th><th>제출#</th><th>판정</th><th>사유</th><th>영상 보고</th></tr>${(data||[]).map(l=>`<tr><td class="mini">${fmtDT(l.created_at)}</td><td>${l.submission_id}</td><td><span class="badge b-${l.decision==="approve"?"approved":l.decision==="reject"?"rejected":"pending"}">${l.decision}</span></td><td class="mini">${esc(l.reason)}</td><td class="mini" style="max-width:380px;white-space:pre-wrap">${esc(l.video_report||"")}</td></tr>`).join("")||`<tr><td colspan=5 class="empty">AI 심사 기록 없음 (관리자가 ${settings.admin_idle_minutes}분 이상 자리를 비우고 대기 제출이 있을 때만 작동)</td></tr>`}</table></div>`; }
+
+async function adSettings(){
+  $("#admin-body").innerHTML=`<div class="card" style="max-width:720px">
+    <div class="field"><label>사이트 이름</label><input id="st-site" value="${esc(settings.site_name||"")}"></div>
+    <div class="field"><label>AI 대리 심사</label><select id="st-ai"><option value="true" ${settings.ai_enabled==="true"?"selected":""}>켜짐</option><option value="false" ${settings.ai_enabled!=="true"?"selected":""}>꺼짐</option></select></div>
+    <div class="row2"><div class="field"><label>관리자 부재 기준 (분)</label><input id="st-idle" type="number" value="${esc(settings.admin_idle_minutes||10)}"><div class="hint">이 시간 동안 관리자 페이지가 열려있지 않으면 AI가 대신 심사</div></div>
+    <div class="field"><label>승인 → 고정 지연 (초)</label><input id="st-delay" type="number" value="${esc(settings.publish_delay_seconds||20)}"><div class="hint">1분 이내 보장을 위해 40 이하 권장</div></div></div>
+    <div class="field"><label>등재 가이드라인</label><textarea id="st-guide" rows="6">${esc(settings.guideline||"")}</textarea></div>
+    <div class="field"><label>CRON_SECRET (AI 즉시 호출 버튼용, Edge Function 의 CRON_SECRET 과 동일)</label><input id="st-cron" value="${esc(settings.cron_secret_hint||"")}"><div class="hint">⚠ 공개 DB에 저장되므로 간단한 값 사용. 비워두면 "AI에게 지금 심사" 버튼은 크론만 기다립니다.</div></div>
+    <button class="btn" onclick="saveSettings()">저장</button>
+    <div class="mini" style="margin-top:16px">API 키(GROQ/GEMINI)는 Supabase Edge Function Secrets 에만 저장됩니다. 사이트에는 절대 넣지 마세요.</div></div>`;
+}
+async function saveSettings(){ const rows=[["site_name",$("#st-site").value],["ai_enabled",$("#st-ai").value],["admin_idle_minutes",$("#st-idle").value],["publish_delay_seconds",$("#st-delay").value],["guideline",$("#st-guide").value],["cron_secret_hint",$("#st-cron").value]].map(([key,value])=>({key,value}));
+  const {error}=await sb.from("settings").upsert(rows); if(error) return toast(error.message); await loadSettings(); toast("저장됨"); }
+
+init();
+</script>
+</body>
+</html>
